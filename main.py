@@ -17,69 +17,84 @@ methods = {
 }
 
 predefined_functions = {
-    1: Equation(lambda x: (-1.38*x**3 - 5.42*x**2 + 2.57*x + 10.95), '-1.38*x^3 - 5.42*x^2 + 2.57*x + 10.95'),
-    2: Equation(lambda x: (x**3 - 1.89*x**2 - 2*x + 1.76), 'x^3 - 1.89*x^2 - 2*x + 1.76'),
-    # https://cutt.ly/6zNbCha
-    3: Equation(lambda x: (x / 2 - 2 * (x + 2.39) ** (1 / 3)), 'x/2 - 2*(x + 2.39)^(1/3)'),
-    # https://cutt.ly/MzNdHH5
-    4: Equation(lambda x: (-x / 2 + math.e ** x + 5 * math.sin(x)), '-x/2 + e^x + 5*sin(x)'),
+    1: Equation(
+        lambda x: (-1.38 * x**3 - 5.42 * x**2 + 2.57 * x + 10.95),
+        '-1.38*x^3 - 5.42*x^2 + 2.57*x + 10.95'
+    ),
+    2: Equation(
+        lambda x: (x**3 - 1.89 * x**2 - 2 * x + 1.76),
+        'x^3 - 1.89*x^2 - 2*x + 1.76'
+    ),
+    3: Equation(
+        lambda x: (x / 2 - 2 * (x + 2.39) ** (1 / 3)),
+        'x/2 - 2*(x + 2.39)^(1/3)'
+    ),
+    4: Equation(
+        lambda x: (-x / 2 + math.e ** x + 5 * math.sin(x)),
+        '-x/2 + e^x + 5*sin(x)'
+    ),
 }
 
 ENABLE_LOGGING = True
 
 while True:
+    # Выбор типа уравнения
     equation_type = mainboilerplate.choose_equation_type()
 
+    # Завершаем работу при выборе типа 3
     if equation_type == 3:
-      break
+        break
 
     if equation_type == 1:
-      function = mainboilerplate.choose_equation(predefined_functions)
-      try:
-          function.draw(-100, 100)
-      except Exception as e:
-          print('(!) Не удалось построить график функции, ', e)
+        function = mainboilerplate.choose_equation(predefined_functions)
+        try:
+            function.draw(-100, 100)
+        except Exception as e:
+            print('(!) Не удалось построить график функции,', e)
 
-      method_number = mainboilerplate.choose_method_number(methods)
+        method_number = mainboilerplate.choose_method_number(methods)
 
-      while True:
-          if method_number == 4:
-            left, epsilon, decimal_places = mainboilerplate.read_initial_data_newton()
-            right = 0
-          else:
-            left, right, epsilon, decimal_places = mainboilerplate.read_initial_data()
+        while True:
+            if method_number == 4:
+                left, epsilon, decimal_places = mainboilerplate.read_initial_data_newton()
+                right = 0
+            else:
+                left, right, epsilon, decimal_places = mainboilerplate.read_initial_data()
 
-          method = methods[method_number](function, left, right, epsilon, decimal_places, ENABLE_LOGGING)
-          try:
-              verified, reason = method.check()
-          except TypeError as te:
-              print('(!) Ошибка при вычислении значения функции, возможно она не определена на всем интервале.')
-              continue
-          if not verified:
-            print('(!) Введенные исходные данные для метода некорректны: ', reason)
-          break
+            method = methods[method_number](function, left, right, epsilon, decimal_places, ENABLE_LOGGING)
+            try:
+                verified, reason = method.check()
+            except TypeError:
+                print('(!) Ошибка при вычислении значения функции, возможно она не определена на всем интервале.')
+                continue
 
-      try:
-          function.draw(left, right)
-      except Exception as e:
-          print('(!) Не удалось построить график функции, ', e)
+            if not verified:
+                print('(!) Введенные исходные данные для метода некорректны:', reason)
+            break
 
-      output_file_name = input("Введите имя файла для вывода результата или пустую строку, чтобы вывести в консоль: ")
+        try:
+            function.draw(left, right)
+        except Exception as e:
+            print('(!) Не удалось построить график функции,', e)
 
-      try:
-          if ENABLE_LOGGING:
-              print('Процесс решения: ')
-          result = method.solve()
-      except Exception as e:
-          print(e)
-          print('(!) Что-то пошло не так при решении: ', e)
-          continue
+        output_file_name = input(
+            "Введите имя файла для вывода результата или пустую строку, чтобы вывести в консоль: "
+        )
 
-      mainboilerplate.print_result(result, output_file_name)
+        try:
+            if ENABLE_LOGGING:
+                print('Процесс решения:')
+            result = method.solve()
+        except Exception as e:
+            print(e)
+            print('(!) Что-то пошло не так при решении:', e)
+            continue
 
-      if input('\nЕще раз? [y/n] ') != 'y':
-          break
+        mainboilerplate.print_result(result, output_file_name)
+
+        if input('\nЕще раз? [y/n] ') != 'y':
+            break
     else:
-      system_of_equation.run()
+        system_of_equation.run()
 
 print('Спасибо за использование программы!')
